@@ -67,7 +67,7 @@
   <header>
     <div class="site-brand">
       <div class="site-title">
-        <a href="/">GODBMW.com</a>
+        <a href="/">Nowlang</a>
       </div>
     </div>
     <nav class="site-navigation">
@@ -147,7 +147,7 @@
                 <li>
                   <a 
                     href="https://github.com/dongyuanxin" 
-                    target="_blank"
+                    target="_self"
                   >
                     Github
                   </a>
@@ -156,7 +156,7 @@
                 <li>
                   <a 
                     href="https://www.zhihu.com/people/godbmw/activities" 
-                    target="_blank"
+                    target="_self"
                   >
                     知乎
                   </a>
@@ -355,43 +355,6 @@
   
 
   
-    <div id="reward">
-  
-    <p id="reward-meta">知识 & 情怀 | 二者兼得</p>
-  
-  <button id="reward-btn">
-    
-    <span>投食</span>
-  </button>
-  <div id="reward-qrcode">
-    
-      <div class="reward-qrcode--container">
-        <img class="qrcode-img" src="/images/wechat.png" alt="微信扫一扫, 向我投食">
-        <p class="qrcode-meta">微信扫一扫, 向我投食</p>
-      </div>
-    
-      <div class="reward-qrcode--container">
-        <img class="qrcode-img" src="/images/alipay.png" alt="支付宝扫一扫, 向我投食">
-        <p class="qrcode-meta">支付宝扫一扫, 向我投食</p>
-      </div>
-    
-  </div>
-
-</div>
-
-<script>
-  (() => {
-    let button = document.querySelector('#reward-btn'),
-      qrcode = document.querySelector('#reward-qrcode'),
-      display = false;
-    
-    button.addEventListener('click', () => {
-      qrcode.style.display = display ? 'none' : 'block'
-      display = !display
-    }, false)
-  })()
-</script>
-  
 
   <div class="article-footer">
     <div class="article-meta pull-left">
@@ -582,7 +545,7 @@ if(true){
 
 <script>
 const timeToNowDOM = document.querySelector("#time-to-now");
-const startTimestamp = new Date(2018, 2, 10).getTime();
+const startTimestamp = new Date(2018, 12, 6).getTime();
 
 const updateTimeStr = () => {
   let offset = parseInt(
