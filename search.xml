@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Linux通用安全加固</title>
+    <url>/2024/10/15/mytest/</url>
+    <content><![CDATA[<p>摘要<br>Linux通用安全加固，主要从系统防火墙（firewalld、iptables等）、密码策略、密码复杂度、账户锁定策略、禁用root通过ssh远程登录、限定su、sudo权限、超时时间、历史命令、文件属性配置、umask权限、硬件资源权限、等方面进行加固操作。</p>
+<span id="more"></span>
+]]></content>
+      <categories>
+        <category>安全运维</category>
+      </categories>
+      <tags>
+        <tag>安全加固</tag>
+      </tags>
+  </entry>
+</search>
