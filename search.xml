@@ -234,4 +234,226 @@
         <tag>安全加固</tag>
       </tags>
   </entry>
+  <entry>
+    <title>vx_image</title>
+    <url>/2024/10/15/vx-image/</url>
+    <content><![CDATA[<h1 id="Linux加固"><a href="#Linux加固" class="headerlink" title="Linux加固"></a>Linux加固</h1><h2 id="入站规则"><a href="#入站规则" class="headerlink" title="入站规则"></a>入站规则</h2><h3 id="firewalld"><a href="#firewalld" class="headerlink" title="firewalld"></a>firewalld</h3><ul>
+<li>firewalld默认拒绝所有，放行同一会话流流量；<br>配置文件位置：&#x2F;etc&#x2F;firewalld&#x2F;zones&#x2F;public.xml   (默认情况下网卡被加入在public区域）<br>配置示例：（放行80&#x2F;tcp端口及dhcpv6-client服务，限制22&#x2F;tcp只能192.168.1.1访问）<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;zone&gt;</span><br><span class="line">  &lt;short&gt;Public&lt;/short&gt;</span><br><span class="line">  &lt;description&gt;描述信息 &lt;/description&gt;</span><br><span class="line">  &lt;service name=&quot;dhcpv6-client&quot;/&gt;</span><br><span class="line">  &lt;port protocol=&quot;tcp&quot; port=&quot;80&quot;/&gt;</span><br><span class="line">  &lt;rule family=&quot;ipv4&quot;&gt;</span><br><span class="line">    &lt;source address=&quot;192.168.1.1/32&quot;/&gt;</span><br><span class="line">    &lt;port protocol=&quot;tcp&quot; port=&quot;22&quot;/&gt;</span><br><span class="line">    &lt;accept/&gt;</span><br><span class="line">  &lt;/rule&gt;</span><br><span class="line">&lt;/zone&gt;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="iptables"><a href="#iptables" class="headerlink" title="iptables"></a>iptables</h3><ul>
+<li>默认放行所有，不加特定参数情况下，当出站为全拒绝，会导致同一会话流流量被阻断；</li>
+</ul>
+<p>查看规则命令： <code>iptables -L -n</code></p>
+<p>参考示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">*filter</span><br><span class="line">:INPUT ACCEPT [0:0]</span><br><span class="line">:FORWARD ACCEPT [0:0]</span><br><span class="line">:OUTPUT ACCEPT [0:0]</span><br><span class="line">#accept ping</span><br><span class="line">-A INPUT -i lo -j ACCEPT</span><br><span class="line">-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT</span><br><span class="line">-A INPUT -p icmp -j ACCEPT</span><br><span class="line">#ssh限定</span><br><span class="line">-A INPUT -s 192.168.1.1 -p tcp --dport 22 -j ACCEPT</span><br><span class="line">-A INPUT -p tcp --dport 22 -j DROP</span><br><span class="line">#因从上到下匹配，最后为阻断规则（-m state --state NEW是为了放行同一会话流流量）</span><br><span class="line">-A INPUT -m state --state NEW -j DROP		#入站规则阻断</span><br><span class="line">-A FORWARD -m state --state NEW -j DROP		#路由转发规则阻断</span><br><span class="line">-A OUTPUT -m state --state NEW -j DROP		#出站规则阻断</span><br><span class="line">COMMIT</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="iptables-state模块"><a href="#iptables-state模块" class="headerlink" title="iptables state模块"></a>iptables state模块</h4><ul>
+<li><p>state模块可以让iptables实现”连接追踪”机制；</p>
+</li>
+<li><p>对于state模块连接状态分为5种：</p>
+<ul>
+<li>NEW<ul>
+<li>连接中的第一个包，状态即为new;(新连接的第一个包状态为new)</li>
+</ul>
+</li>
+<li>ESTABLISHED<ul>
+<li>new包后面的包即为established，表示连接已建立；<br>  ![](vx_image&#x2F;158317225031.png &#x3D;600x)</li>
+</ul>
+</li>
+<li>RELATED<ul>
+<li>关系；例如ftp服务端会建立2个进程（命令进程和数据进程）；命令进程负责服务端与客户端的命令传输（命令连接），数据进程负责服务端与客户端数据传输（数据连接）；但传输的数据由命令控制，数据连接中的报文与命令连接是有关系的，数据连接中的报文可能为related状态；</li>
+</ul>
+</li>
+<li>INVALID<ul>
+<li>一个包无法被识别或无任何状态，则为invalid</li>
+</ul>
+</li>
+<li>UNTRACKED<ul>
+<li>该状态表示报文未被追踪，一般表示无法找到相关的连接；</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>表示只有回应我们的报文才能通过防火墙，如果是别人主动发送过来的新报文则拒绝：</p>
+  <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-m state --state RELATED,ESTABLISHED -j ACCEPT</span><br><span class="line">-j DROP</span><br><span class="line">或将下面一条置为末尾</span><br><span class="line">-m state --state NEW,INVALID,UNTRACKED -j DROP</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="出站规则"><a href="#出站规则" class="headerlink" title="出站规则"></a>出站规则</h2><p>firewalld暂未找到可直接建立出站规则的方法，但可以通过 <code>--direct</code> 传递iptables命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">firewall-cmd --permanent  --direct --add-rule ipv4 filter OUTPUT 9-d 192.168.1.1 -j ACCEPT</span><br><span class="line">firewall-cmd --permanent  --direct --add-rule ipv4 filter OUTPUT 10 -j DROP</span><br></pre></td></tr></table></figure>
+<p>![](vx_image&#x2F;1948133214329.png &#x3D;600x)</p>
+<h2 id="密码策略"><a href="#密码策略" class="headerlink" title="密码策略"></a>密码策略</h2><p>用户账户文件：&#x2F;etc&#x2F;passwd和&#x2F;etc&#x2F;shadow<br>隐藏账户思路：通过定时任务将passwd及shadow文件内容备份，后追加新增的用户至passwd和shadow文件中，一段时间后，将备份的passwd、shadow文件内容覆盖回passwd、shadow，达到在某个时间段出现新用户，之后用户消失</p>
+<h3 id="配置文件-etc-login-defs"><a href="#配置文件-etc-login-defs" class="headerlink" title="配置文件&#x2F;etc&#x2F;login.defs"></a>配置文件&#x2F;etc&#x2F;login.defs</h3><blockquote>
+<p>该配置文件的修改仅对新用户有效，对已有的账户不生效，但可实用chage命令对已有账户进行适配；</p>
+</blockquote>
+<ul>
+<li><p>内容会有较多注释信息，可通过grep命令进行过滤重新写入</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cp -a /etc/login.defs /etc/login.defs.bak_20200403      #备份文件</span><br><span class="line">grep -Ev &quot;^#|^$&quot; login.defs.bak_20200403 &gt; login.defs   #去除空行及注释行</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>PASS_MIN_LEN默认注释，经过1的操作，该内容会被去除，需要手动添加，最终如下:<br>![](vx_image&#x2F;1847136210580.png &#x3D;600x)</p>
+</li>
+<li><p>chage<br>![](vx_image&#x2F;2877037210719.png &#x3D;600x)</p>
+</li>
+</ul>
+<h3 id="密码复杂度-etc-pam-d-system-auth-ac"><a href="#密码复杂度-etc-pam-d-system-auth-ac" class="headerlink" title="密码复杂度&#x2F;etc&#x2F;pam.d&#x2F;system-auth-ac"></a>密码复杂度&#x2F;etc&#x2F;pam.d&#x2F;system-auth-ac</h3><blockquote>
+<p>pam_cracklib仅使用于password模块，即仅使用于使用passwd修改密码的方式</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">password requisite pam_cracklib.so try_first_pass retry=3 type=reject_username minlen=12 lcredit=1 ucredit=1 ocredit=1 difok=6</span><br></pre></td></tr></table></figure>
+
+<p>![](vx_image&#x2F;4999238222809.png &#x3D;600x)</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">minlen=12               #密码字符长度不少于12位</span><br><span class="line">lcredit=-1              #至少包含1个小写字母</span><br><span class="line">ucredit=-1              #至少包含1个大写字母</span><br><span class="line">dcredit=-1              #至少包含1个数字</span><br><span class="line">ocredit=-1              #至少包含1个特殊字符</span><br><span class="line">retry=3                 #配置密码时，提示3次用户密码错误输入</span><br><span class="line">difok=6                 #配置密码时，新密码中至少6个字符与旧密码不同(默认为5)</span><br><span class="line">type=reject_username    #新密码中不能包含与用户名相同的字段</span><br><span class="line">maxrepeat=N             #拒绝包含超过N个连续字符的密码，默认值为0（表示禁用）</span><br><span class="line">maxsequence=N	           #拒绝包含大于N的单调字符序列密码（如1234）</span><br><span class="line">use_authtok             #强制使用先前的密码，不提示用户输入新密码（拒绝用户修改密码）</span><br></pre></td></tr></table></figure>
+
+<p>该方法仅限直接通过passwd修改密码才会触发该限制，通过<code>echo “root”|passwd –stdin root</code>的方法可绕过该限制（该命令修改root密码为root）</p>
+<h2 id="账户锁定策略"><a href="#账户锁定策略" class="headerlink" title="账户锁定策略"></a>账户锁定策略</h2><p>新增的内容需要写入在第一行，非第一行的情况下，即使提示用户被锁钉，但只要输入一次正确密码即可正常登录，无法起到密码防爆破的效果；</p>
+<h3 id="配置文件-etc-pam-d-sshd"><a href="#配置文件-etc-pam-d-sshd" class="headerlink" title="配置文件&#x2F;etc&#x2F;pam.d&#x2F;sshd"></a>配置文件&#x2F;etc&#x2F;pam.d&#x2F;sshd</h3><blockquote>
+<p>该配置文件中策略仅影响客户端访问&#x2F;usr&#x2F;sbin&#x2F;sshd服务登录行为</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vim /etc/pam.d/sshd</span><br><span class="line">---</span><br><span class="line">auth required pam_tally2.so deny=3 unlock_time=300 even_deny_root root_unlock_time=10</span><br><span class="line">---</span><br><span class="line">#deny                    //设置普通用户和root用户连续错误的登录最大次数，超过最大次数则锁定账户；</span><br><span class="line">#unlock_time             //设定普通用户锁定后多少秒后解锁；</span><br><span class="line">#even_deny_root          //同时限定root用户；</span><br><span class="line">#root_unlock_time        //设定root用户锁定后多少秒解锁；</span><br></pre></td></tr></table></figure>
+<p>![](vx_image&#x2F;2846445227848.png &#x3D;600x)</p>
+<h3 id="配置文件-etc-pam-d-login"><a href="#配置文件-etc-pam-d-login" class="headerlink" title="配置文件&#x2F;etc&#x2F;pam.d&#x2F;login"></a>配置文件&#x2F;etc&#x2F;pam.d&#x2F;login</h3><blockquote>
+<p>该配置文件中策略仅影响通过&#x2F;usr&#x2F;bin&#x2F;login登录操作系统行为</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vim /etc/pam.d/login</span><br><span class="line">---</span><br><span class="line">auth required pam_tally2.so deny=3 lock_time=300 even_deny_root root_unlock_time=10</span><br><span class="line">---</span><br><span class="line">#错3次锁定300秒，同时对root用户生效，root用户解锁时间为10秒</span><br></pre></td></tr></table></figure>
+<p>![](vx_image&#x2F;1943948229143.png &#x3D;600x)</p>
+<ul>
+<li><p>查看用户错误登录次数</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pam_tally2 –user</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>解锁账号（清空错误登录次数）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pam_tally2 –user username –reset</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="禁止root用户通过ssh直接登录"><a href="#禁止root用户通过ssh直接登录" class="headerlink" title="禁止root用户通过ssh直接登录"></a>禁止root用户通过ssh直接登录</h3><blockquote>
+<p>默认为禁止，但可开启，配置文件位置一般为&#x2F;etc&#x2F;ssh&#x2F;sshd_config</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vim /etc/ssh/sshd_config</span><br><span class="line">---</span><br><span class="line">修改PermitRootLogin yes为PermitRootLogin no</span><br></pre></td></tr></table></figure>
+<p>![](vx_image&#x2F;802851230145.png &#x3D;600x)</p>
+<h3 id="限制特定用户可以su到root"><a href="#限制特定用户可以su到root" class="headerlink" title="限制特定用户可以su到root"></a>限制特定用户可以su到root</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">usermod -a user -G wheel		#将user用户加入wheel组</span><br><span class="line">---</span><br><span class="line">vim /etc/pam.d/su	#将第6行解除注释</span><br></pre></td></tr></table></figure>
+<p>![](vx_image&#x2F;342152230322.png &#x3D;600x)<br>![](vx_image&#x2F;1514152215874.png &#x3D;600x)</p>
+<h2 id="超时时间"><a href="#超时时间" class="headerlink" title="超时时间"></a>超时时间</h2><blockquote>
+<p>设置系统登录后，无操作600秒后自动断开连接；</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vim /etc/profile</span><br><span class="line">添加：export TMOUT=600</span><br><span class="line">---</span><br><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
+<p>![](vx_image&#x2F;3129253232153.png &#x3D;600x)</p>
+<p>效果如下：<br>![](vx_image&#x2F;4875553225198.png &#x3D;600x)</p>
+<h2 id="历史命令"><a href="#历史命令" class="headerlink" title="历史命令"></a>历史命令</h2><ul>
+<li><p>默认只记录1000条；</p>
+</li>
+<li><p>默认不记录命令执行时间；</p>
+</li>
+<li><p>当前shell退出后才会将当前shell从启动到关闭期间执行过的命令记录至日志文件中；</p>
+</li>
+<li><p>各账户的history命令记录日志存放于 <code>~/.bash_history</code></p>
+</li>
+<li><p>root用户的history日志 <code>/root/.bash_history</code></p>
+</li>
+<li><p>修改配置文件&#x2F;etc&#x2F;profile历史命令配置，但该配置只影响系统默认shell（例如当前默认shell为&#x2F;bin&#x2F;bash shell环境，那么第三方的如zsh shell则不会受影响）</p>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vim /etc/profile</span><br><span class="line">新增：</span><br><span class="line">HISTSIZE=1000000</span><br><span class="line">export HISTTIMEFORMAT=&quot;%y-%m-%d %H:%M:%S &quot;</span><br><span class="line">-------------------------------------------------------------------</span><br><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
+
+<p>效果：<br>![](vx_image&#x2F;3705256221965.png &#x3D;600x)</p>
+<h2 id="文件属性"><a href="#文件属性" class="headerlink" title="文件属性"></a>文件属性</h2><ul>
+<li>配合普通用户权限运行程序使用，将一些关键配置文件配置为只允许root用户读写「执」（执行可选），其他用户只能读，降低程序配置文件被篡改的风险；</li>
+<li>可通过setfacl配置acl规则限制某一文件&#x2F;目录仅允许某用户&#x2F;组进行读&#x2F;写、执权限；<ul>
+<li>示例：允许普通用户user对&#x2F;root目录进行读写执：  <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">setfacl -Rm u:user:rwx /root</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>通过对一些关键配置文件配置隐藏权限，降低被篡改的风险；<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chattr 「参数」 文件</span><br></pre></td></tr></table></figure>
+示例：chattr +a filneame<br>参数：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">参数</th>
+<th align="center">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">i</td>
+<td align="center">无法对文件进行修改；若对目录设置了该参数，则仅能修改其中的子文件内容而不能新建或删除文件</td>
+</tr>
+<tr>
+<td align="center">a</td>
+<td align="center">仅允许补充（追加）内容，无法覆盖&#x2F;删除内容（Append Only）</td>
+</tr>
+<tr>
+<td align="center">S</td>
+<td align="center">文件内容在变更后立即同步到硬盘（sync）</td>
+</tr>
+<tr>
+<td align="center">s</td>
+<td align="center">彻底从硬盘中删除，不可恢复（用0填充原文件所在硬盘区域）</td>
+</tr>
+<tr>
+<td align="center">A</td>
+<td align="center">不再修改这个文件或目录的最后访问时间（atime）</td>
+</tr>
+<tr>
+<td align="center">b</td>
+<td align="center">不再修改文件或目录的存取时间</td>
+</tr>
+<tr>
+<td align="center">D</td>
+<td align="center">检查压缩文件中的错误</td>
+</tr>
+<tr>
+<td align="center">d</td>
+<td align="center">使用dump命令备份时忽略本文件&#x2F;目录</td>
+</tr>
+<tr>
+<td align="center">c</td>
+<td align="center">默认将文件或目录进行压缩</td>
+</tr>
+<tr>
+<td align="center">u</td>
+<td align="center">当删除该文件后依然保留其在硬盘中的数据，方便日后恢复</td>
+</tr>
+<tr>
+<td align="center">t</td>
+<td align="center">让文件系统支持尾部合并（tail-merging）</td>
+</tr>
+<tr>
+<td align="center">x</td>
+<td align="center">可以直接访问压缩文件中的内容</td>
+</tr>
+</tbody></table>
+<h2 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h2><ul>
+<li>默认正常记录安全日志，日志默认位置：&#x2F;var&#x2F;log&#x2F;secure</li>
+</ul>
+<h3 id="任务计划日志"><a href="#任务计划日志" class="headerlink" title="任务计划日志"></a>任务计划日志</h3><ul>
+<li><p>日志位置：&#x2F;var&#x2F;log&#x2F;cron<br>![](vx_image&#x2F;4182211222296.png &#x3D;600x)</p>
+</li>
+<li><p>任务计划配置文件位置<br><code>root：/etc/crontab</code><br>![](vx_image&#x2F;2243712240339.png &#x3D;600x)</p>
+</li>
+</ul>
+<p>普通用户：<code>/var/spool/cron/</code><br>![](vx_image&#x2F;4801412246094.png &#x3D;600x)</p>
+<ul>
+<li><code>/etc/cron.d/*</code>下效果等同于crontab<br>![](vx_image&#x2F;1433113246726.png &#x3D;600x)</li>
+</ul>
+<h3 id="日志转发"><a href="#日志转发" class="headerlink" title="日志转发"></a>日志转发</h3><p>修改应用服务器日志配置文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vi /etc/rsyslog.conf</span><br></pre></td></tr></table></figure>
+
+<p>确认关键日志审计是否存在</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">*.info;mail.none;authpriv.none;cron.none  /var/log/messages</span><br><span class="line">authpriv.*                                /var/log/secure</span><br></pre></td></tr></table></figure>
+
+<p>添加转发日志信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">*.info;mail.none;authpriv.none;cron.none @ip</span><br><span class="line">authpriv.* @ip</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改umask"><a href="#修改umask" class="headerlink" title="修改umask"></a>修改umask</h2><p>目的：修改创建文件或目录时的默认权限，防止属于该组的其他用户级别组的用户修改该用户的文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">修改以下文件，在末尾加上  umask 027</span><br><span class="line"></span><br><span class="line">/etc/profile</span><br><span class="line">/etc/csh.login</span><br><span class="line">/etc/csh.cshrc</span><br><span class="line">/etc/bashrc</span><br></pre></td></tr></table></figure>
+
+<h2 id="限制硬件资源"><a href="#限制硬件资源" class="headerlink" title="限制硬件资源"></a>限制硬件资源</h2><p>限制用户对系统资源的使用，减缓DDOS等攻击带来的危害</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#core 0:禁止创建core文件</span><br><span class="line">#nproc 20：限制最高进程数为20</span><br><span class="line">#rss 5000：除root用户外，其他用户只能使用5M内存</span><br><span class="line">#“*”表示所有登录到系统中的用户</span><br><span class="line">#nofie：限制每个进程最多创建多少个文件</span><br><span class="line">修改文件   /etc/security/limits.conf</span><br><span class="line"></span><br><span class="line">* soft core   0</span><br><span class="line">* hard core   0</span><br><span class="line">* hard rss    5000</span><br><span class="line">* hard nproc  20</span><br><span class="line">* hard nofile 50</span><br></pre></td></tr></table></figure>
+
+<h2 id="打开syncookie，缓解syn-flood攻击"><a href="#打开syncookie，缓解syn-flood攻击" class="headerlink" title="打开syncookie，缓解syn flood攻击"></a>打开syncookie，缓解syn flood攻击</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">编辑配置：vi /etc/sysctl.conf</span><br><span class="line"></span><br><span class="line"> net.ipv4.tcvp_syncookies = 1</span><br><span class="line"></span><br><span class="line">生效配置：syusctl -p</span><br></pre></td></tr></table></figure>
+
+<h2 id="防御syn-flood攻击"><a href="#防御syn-flood攻击" class="headerlink" title="防御syn flood攻击"></a>防御syn flood攻击</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">查询当前半连接上限：</span><br><span class="line">sysctl net.ipv4.tcp_max_syn_backlog</span><br><span class="line"></span><br><span class="line">修改半连接上限：</span><br><span class="line">sysctl -w net.ipv4.tcp_max_syn_backlog=&quot;2048&quot;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="查找sid权限文件"><a href="#查找sid权限文件" class="headerlink" title="查找sid权限文件"></a>查找sid权限文件</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">find / -type f \(-perm -04000 -o -perm -02000\)|xargs -l &#123;&#125; ls -lh &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="关闭无源路由，防止arp攻击"><a href="#关闭无源路由，防止arp攻击" class="headerlink" title="关闭无源路由，防止arp攻击"></a>关闭无源路由，防止arp攻击</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sysctl -n net.ipv4.conf.all.accept_source_route</span><br><span class="line"></span><br><span class="line">echo 0 &gt; /proc/sys/net/ipv4/conf/all/accept_source_route</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="查找账户目录中是否存在高危文件-nettrc-rhosts"><a href="#查找账户目录中是否存在高危文件-nettrc-rhosts" class="headerlink" title="查找账户目录中是否存在高危文件 .nettrc .rhosts"></a>查找账户目录中是否存在高危文件 .nettrc .rhosts</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">for DIR in `cut -d&quot;:&quot; -f6 /etc/passwd`;do</span><br><span class="line">if [-e $DIR/.netrc];then</span><br><span class="line">echo &quot;$DIR/.netrc&quot;</span><br><span class="line">fi</span><br><span class="line">done</span><br></pre></td></tr></table></figure>]]></content>
+  </entry>
 </search>

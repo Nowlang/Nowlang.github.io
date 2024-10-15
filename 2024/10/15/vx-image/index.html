@@ -20,28 +20,32 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="Linux加固入站规则firewalld firewalld默认拒绝所有，放行同一会话流流量；配置文件位置：&#x2F;etc&#x2F;firewalld&#x2F;zones&#x2F;public.xml   (默认情况下网卡被加入在public区域）配置示例：（放行80&#x2F;tcp端口及dhcpv6-client服务，限制22&#x2F;tcp只能192.168.1.1访问）1234">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vx_image">
+<meta property="og:url" content="http://example.com/2024/10/15/vx-image/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Linux加固入站规则firewalld firewalld默认拒绝所有，放行同一会话流流量；配置文件位置：&#x2F;etc&#x2F;firewalld&#x2F;zones&#x2F;public.xml   (默认情况下网卡被加入在public区域）配置示例：（放行80&#x2F;tcp端口及dhcpv6-client服务，限制22&#x2F;tcp只能192.168.1.1访问）1234">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-10-15T04:07:43.000Z">
+<meta property="article:modified_time" content="2024-10-15T04:10:20.001Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://example.com/">
+<link rel="canonical" href="http://example.com/2024/10/15/vx-image/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>Hexo</title>
+  <title>vx_image | Hexo</title>
   
 
 
@@ -177,9 +181,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -195,10 +200,9 @@
       <meta itemprop="name" content="Hexo">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/15/vx-image/" class="post-title-link" itemprop="url">vx_image</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          vx_image
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -222,7 +226,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="Linux加固"><a href="#Linux加固" class="headerlink" title="Linux加固"></a>Linux加固</h1><h2 id="入站规则"><a href="#入站规则" class="headerlink" title="入站规则"></a>入站规则</h2><h3 id="firewalld"><a href="#firewalld" class="headerlink" title="firewalld"></a>firewalld</h3><ul>
+        <h1 id="Linux加固"><a href="#Linux加固" class="headerlink" title="Linux加固"></a>Linux加固</h1><h2 id="入站规则"><a href="#入站规则" class="headerlink" title="入站规则"></a>入站规则</h2><h3 id="firewalld"><a href="#firewalld" class="headerlink" title="firewalld"></a>firewalld</h3><ul>
 <li>firewalld默认拒绝所有，放行同一会话流流量；<br>配置文件位置：&#x2F;etc&#x2F;firewalld&#x2F;zones&#x2F;public.xml   (默认情况下网卡被加入在public区域）<br>配置示例：（放行80&#x2F;tcp端口及dhcpv6-client服务，限制22&#x2F;tcp只能192.168.1.1访问）<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;zone&gt;</span><br><span class="line">  &lt;short&gt;Public&lt;/short&gt;</span><br><span class="line">  &lt;description&gt;描述信息 &lt;/description&gt;</span><br><span class="line">  &lt;service name=&quot;dhcpv6-client&quot;/&gt;</span><br><span class="line">  &lt;port protocol=&quot;tcp&quot; port=&quot;80&quot;/&gt;</span><br><span class="line">  &lt;rule family=&quot;ipv4&quot;&gt;</span><br><span class="line">    &lt;source address=&quot;192.168.1.1/32&quot;/&gt;</span><br><span class="line">    &lt;port protocol=&quot;tcp&quot; port=&quot;22&quot;/&gt;</span><br><span class="line">    &lt;accept/&gt;</span><br><span class="line">  &lt;/rule&gt;</span><br><span class="line">&lt;/zone&gt;</span><br></pre></td></tr></table></figure></li>
 </ul>
 <h3 id="iptables"><a href="#iptables" class="headerlink" title="iptables"></a>iptables</h3><ul>
@@ -440,96 +444,30 @@
 
 
 <h2 id="查找账户目录中是否存在高危文件-nettrc-rhosts"><a href="#查找账户目录中是否存在高危文件-nettrc-rhosts" class="headerlink" title="查找账户目录中是否存在高危文件 .nettrc .rhosts"></a>查找账户目录中是否存在高危文件 .nettrc .rhosts</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">for DIR in `cut -d&quot;:&quot; -f6 /etc/passwd`;do</span><br><span class="line">if [-e $DIR/.netrc];then</span><br><span class="line">echo &quot;$DIR/.netrc&quot;</span><br><span class="line">fi</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
-      
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/10/15/Linux%E9%80%9A%E7%94%A8%E5%AE%89%E5%85%A8%E5%8A%A0%E5%9B%BA/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/15/Linux%E9%80%9A%E7%94%A8%E5%AE%89%E5%85%A8%E5%8A%A0%E5%9B%BA/" class="post-title-link" itemprop="url">Linux通用安全加固</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-10-15 10:56:23 / 修改时间：12:08:43" itemprop="dateCreated datePublished" datetime="2024-10-15T10:56:23+08:00">2024-10-15</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%AE%89%E5%85%A8%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">安全运维</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>摘要<br>Linux通用安全加固，主要从系统防火墙（firewalld、iptables等）、密码策略、密码复杂度、账户锁定策略、禁用root通过ssh远程登录、限定su、sudo权限、超时时间、历史命令、文件属性配置、umask权限、硬件资源权限、等方面进行加固操作。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/10/15/Linux%E9%80%9A%E7%94%A8%E5%AE%89%E5%85%A8%E5%8A%A0%E5%9B%BA/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/10/15/Linux%E9%80%9A%E7%94%A8%E5%AE%89%E5%85%A8%E5%8A%A0%E5%9B%BA/" rel="prev" title="Linux通用安全加固">
+      <i class="fa fa-chevron-left"></i> Linux通用安全加固
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
       </footer>
+    
   </article>
   
   
-  
-
-
   
 
 
@@ -582,6 +520,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux%E5%8A%A0%E5%9B%BA"><span class="nav-number">1.</span> <span class="nav-text">Linux加固</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A5%E7%AB%99%E8%A7%84%E5%88%99"><span class="nav-number">1.1.</span> <span class="nav-text">入站规则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#firewalld"><span class="nav-number">1.1.1.</span> <span class="nav-text">firewalld</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iptables"><span class="nav-number">1.1.2.</span> <span class="nav-text">iptables</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#iptables-state%E6%A8%A1%E5%9D%97"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">iptables state模块</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BA%E7%AB%99%E8%A7%84%E5%88%99"><span class="nav-number">1.2.</span> <span class="nav-text">出站规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%86%E7%A0%81%E7%AD%96%E7%95%A5"><span class="nav-number">1.3.</span> <span class="nav-text">密码策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-etc-login-defs"><span class="nav-number">1.3.1.</span> <span class="nav-text">配置文件&#x2F;etc&#x2F;login.defs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%86%E7%A0%81%E5%A4%8D%E6%9D%82%E5%BA%A6-etc-pam-d-system-auth-ac"><span class="nav-number">1.3.2.</span> <span class="nav-text">密码复杂度&#x2F;etc&#x2F;pam.d&#x2F;system-auth-ac</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B4%A6%E6%88%B7%E9%94%81%E5%AE%9A%E7%AD%96%E7%95%A5"><span class="nav-number">1.4.</span> <span class="nav-text">账户锁定策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-etc-pam-d-sshd"><span class="nav-number">1.4.1.</span> <span class="nav-text">配置文件&#x2F;etc&#x2F;pam.d&#x2F;sshd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-etc-pam-d-login"><span class="nav-number">1.4.2.</span> <span class="nav-text">配置文件&#x2F;etc&#x2F;pam.d&#x2F;login</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A6%81%E6%AD%A2root%E7%94%A8%E6%88%B7%E9%80%9A%E8%BF%87ssh%E7%9B%B4%E6%8E%A5%E7%99%BB%E5%BD%95"><span class="nav-number">1.4.3.</span> <span class="nav-text">禁止root用户通过ssh直接登录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%90%E5%88%B6%E7%89%B9%E5%AE%9A%E7%94%A8%E6%88%B7%E5%8F%AF%E4%BB%A5su%E5%88%B0root"><span class="nav-number">1.4.4.</span> <span class="nav-text">限制特定用户可以su到root</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B6%85%E6%97%B6%E6%97%B6%E9%97%B4"><span class="nav-number">1.5.</span> <span class="nav-text">超时时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%86%E5%8F%B2%E5%91%BD%E4%BB%A4"><span class="nav-number">1.6.</span> <span class="nav-text">历史命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%B1%9E%E6%80%A7"><span class="nav-number">1.7.</span> <span class="nav-text">文件属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A5%E5%BF%97"><span class="nav-number">1.8.</span> <span class="nav-text">日志</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E8%AE%A1%E5%88%92%E6%97%A5%E5%BF%97"><span class="nav-number">1.8.1.</span> <span class="nav-text">任务计划日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E8%BD%AC%E5%8F%91"><span class="nav-number">1.8.2.</span> <span class="nav-text">日志转发</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9umask"><span class="nav-number">1.9.</span> <span class="nav-text">修改umask</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%90%E5%88%B6%E7%A1%AC%E4%BB%B6%E8%B5%84%E6%BA%90"><span class="nav-number">1.10.</span> <span class="nav-text">限制硬件资源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%93%E5%BC%80syncookie%EF%BC%8C%E7%BC%93%E8%A7%A3syn-flood%E6%94%BB%E5%87%BB"><span class="nav-number">1.11.</span> <span class="nav-text">打开syncookie，缓解syn flood攻击</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B2%E5%BE%A1syn-flood%E6%94%BB%E5%87%BB"><span class="nav-number">1.12.</span> <span class="nav-text">防御syn flood攻击</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E6%89%BEsid%E6%9D%83%E9%99%90%E6%96%87%E4%BB%B6"><span class="nav-number">1.13.</span> <span class="nav-text">查找sid权限文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%97%AD%E6%97%A0%E6%BA%90%E8%B7%AF%E7%94%B1%EF%BC%8C%E9%98%B2%E6%AD%A2arp%E6%94%BB%E5%87%BB"><span class="nav-number">1.14.</span> <span class="nav-text">关闭无源路由，防止arp攻击</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E8%B4%A6%E6%88%B7%E7%9B%AE%E5%BD%95%E4%B8%AD%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E9%AB%98%E5%8D%B1%E6%96%87%E4%BB%B6-nettrc-rhosts"><span class="nav-number">1.15.</span> <span class="nav-text">查找账户目录中是否存在高危文件 .nettrc .rhosts</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
